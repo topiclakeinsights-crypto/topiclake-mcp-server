@@ -47,6 +47,10 @@ async def make_api_request(endpoint: str, params: Dict[str, Any]) -> Dict[str, A
 async def root():
     return {"message": "TopicLake MCP Server is running!", "status": "healthy"}
 
+@app.post("/")
+async def post_root():
+    return {"message": "TopicLake MCP Server is running!", "status": "healthy"}
+
 @app.get("/health")
 async def health():
     return {"status": "healthy"}
