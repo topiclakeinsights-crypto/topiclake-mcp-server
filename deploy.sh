@@ -2,7 +2,7 @@
 # Deploy to Google Cloud Run
 
 # Set your project ID (replace with your actual project ID)
-PROJECT_ID="topiclake-mcp"
+PROJECT_ID="topiclake-insights-engine"
 SERVICE_NAME="topiclake-mcp-server"
 REGION="us-central1"
 
