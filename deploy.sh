@@ -12,7 +12,7 @@ gcloud run deploy $SERVICE_NAME \
     --platform managed \
     --region $REGION \
     --allow-unauthenticated \
-    --set-env-vars TOPICLAKE_BEARER_TOKEN="YOUR_BEARER_TOKEN_HERE" \
+    --set-env-vars TOPICLAKE_BEARER_TOKEN="your-secret-name:latest" \
     --project $PROJECT_ID
 
 echo "Deployment complete!"
