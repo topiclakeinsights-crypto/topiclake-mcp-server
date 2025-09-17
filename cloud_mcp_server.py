@@ -13,12 +13,6 @@ app = FastAPI(title="TopicLake MCP Server", version="1.0.0")
 
 print("--- FASTAPI APP CREATED ---")
 
-# This is where the routers are included
-app.include_router(health_router, prefix="/api/v1")
-print("--- HEALTH ROUTER INCLUDED ---")
-app.include_router(chat_router, prefix="/api/v1")
-print("--- CHAT ROUTER INCLUDED ---")
-
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
