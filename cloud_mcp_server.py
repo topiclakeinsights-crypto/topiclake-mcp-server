@@ -63,31 +63,36 @@ async def health():
 async def get_documents(params: Dict[str, Any]):
     """Get documents from TopicLake API"""
     result = await make_api_request("/documents", params)
-    return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
+    # FIX: Return the result as a JSON object, not a string
+    return {"content": [{"type": "json", "json": result}]}
 
 @app.post("/mcp/tools/get_topiclake_topics")
 async def get_topiclake_topics(params: Dict[str, Any]):
     """Get TopicLake topics"""
     result = await make_api_request("/topiclake_topics", params)
-    return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
+    # FIX: Return the result as a JSON object, not a string
+    return {"content": [{"type": "json", "json": result}]}
 
 @app.post("/mcp/tools/get_qna")
 async def get_qna(params: Dict[str, Any]):
     """Get Q&A pairs from TopicLake"""
     result = await make_api_request("/qna", params)
-    return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
+    # FIX: Return the result as a JSON object, not a string
+    return {"content": [{"type": "json", "json": result}]}
 
 @app.post("/mcp/tools/get_sentiment")
 async def get_sentiment(params: Dict[str, Any]):
     """Get sentiment analysis from TopicLake"""
     result = await make_api_request("/sentiment", params)
-    return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
+    # FIX: Return the result as a JSON object, not a string
+    return {"content": [{"type": "json", "json": result}]}
 
 @app.post("/mcp/tools/get_summary")
 async def get_summary(params: Dict[str, Any]):
     """Get document summaries from TopicLake"""
     result = await make_api_request("/summary", params)
-    return {"content": [{"type": "text", "text": json.dumps(result, indent=2)}]}
+    # FIX: Return the result as a JSON object, not a string
+    return {"content": [{"type": "json", "json": result}]}
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
