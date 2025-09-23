@@ -3,8 +3,9 @@ import json
 import os
 from typing import Any, Dict, List, Optional
 import httpx
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 import uvicorn
 
 print("--- SCRIPT START ---")
@@ -28,6 +29,15 @@ if not BEARER_TOKEN:
     raise ValueError("TOPICLAKE_BEARER_TOKEN environment variable is required")
 
 BASE_URL = "https://app.topiclake.com/policyinsights/us/export/api/v1"
+
+# MCP Request/Response Models
+class MCPRequest(BaseModel):
+    method: str
+    params: Optional[Dict[str, Any]] = None
+
+class MCPToolCall(BaseModel):
+    name: str
+    arguments: Optional[Dict[str, Any]] = None
 
 async def make_api_request(endpoint: str, params: Dict[str, Any]) -> Dict[str, Any]:
     """Make request to TopicLake API"""
@@ -59,41 +69,204 @@ async def post_root():
 async def health():
     return {"status": "healthy"}
 
+# MCP Protocol Endpoints
+@app.get("/mcp/tools")
+@app.post("/mcp/tools")
+async def list_tools():
+    """List available MCP tools"""
+    return {
+        "tools": [
+            {
+                "name": "get_documents",
+                "description": "Get documents from TopicLake API. Use parameters like limit, offset, search terms, etc.",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "limit": {"type": "integer", "description": "Number of documents to return"},
+                        "offset": {"type": "integer", "description": "Offset for pagination"},
+                        "search": {"type": "string", "description": "Search term"},
+                        "date_from": {"type": "string", "description": "Start date (YYYY-MM-DD)"},
+                        "date_to": {"type": "string", "description": "End date (YYYY-MM-DD)"}
+                    }
+                }
+            },
+            {
+                "name": "get_topiclake_topics",
+                "description": "Get TopicLake topics and categories",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "limit": {"type": "integer", "description": "Number of topics to return"},
+                        "category": {"type": "string", "description": "Topic category filter"}
+                    }
+                }
+            },
+            {
+                "name": "get_qna",
+                "description": "Get Q&A pairs from TopicLake",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "document_id": {"type": "string", "description": "Document ID"},
+                        "limit": {"type": "integer", "description": "Number of Q&A pairs to return"}
+                    }
+                }
+            },
+            {
+                "name": "get_sentiment",
+                "description": "Get sentiment analysis from TopicLake",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "document_id": {"type": "string", "description": "Document ID"},
+                        "text": {"type": "string", "description": "Text to analyze"}
+                    }
+                }
+            },
+            {
+                "name": "get_summary",
+                "description": "Get document summaries from TopicLake",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "document_id": {"type": "string", "description": "Document ID"},
+                        "summary_type": {"type": "string", "description": "Type of summary"}
+                    }
+                }
+            }
+        ]
+    }
+
+@app.post("/mcp/tools/call")
+async def call_tool(request: MCPToolCall):
+    """Call a specific MCP tool"""
+    tool_name = request.name
+    arguments = request.arguments or {}
+    
+    try:
+        if tool_name == "get_documents":
+            result = await make_api_request("/documents", arguments)
+            return {
+                "content": [
+                    {
+                        "type": "text",
+                        "text": f"Found {len(result.get('data', []))} documents"
+                    },
+                    {
+                        "type": "json",
+                        "json": result
+                    }
+                ]
+            }
+        
+        elif tool_name == "get_topiclake_topics":
+            result = await make_api_request("/topiclake_topics", arguments)
+            return {
+                "content": [
+                    {
+                        "type": "text", 
+                        "text": f"Found {len(result.get('data', []))} topics"
+                    },
+                    {
+                        "type": "json",
+                        "json": result
+                    }
+                ]
+            }
+        
+        elif tool_name == "get_qna":
+            result = await make_api_request("/qna", arguments)
+            return {
+                "content": [
+                    {
+                        "type": "text",
+                        "text": f"Found {len(result.get('data', []))} Q&A pairs"
+                    },
+                    {
+                        "type": "json",
+                        "json": result
+                    }
+                ]
+            }
+        
+        elif tool_name == "get_sentiment":
+            result = await make_api_request("/sentiment", arguments)
+            return {
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Sentiment analysis completed"
+                    },
+                    {
+                        "type": "json",
+                        "json": result
+                    }
+                ]
+            }
+        
+        elif tool_name == "get_summary":
+            result = await make_api_request("/summary", arguments)
+            return {
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Summary generated"
+                    },
+                    {
+                        "type": "json",
+                        "json": result
+                    }
+                ]
+            }
+        
+        else:
+            raise HTTPException(status_code=404, detail=f"Tool '{tool_name}' not found")
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Tool execution failed: {str(e)}")
+
+# Legacy endpoints for backward compatibility
 @app.post("/mcp/tools/get_documents")
-async def get_documents(params: Dict[str, Any]):
-    """Get documents from TopicLake API"""
+async def get_documents_legacy(request: Request):
+    """Legacy endpoint - Get documents from TopicLake API"""
+    body = await request.json()
+    params = body.get("arguments", body)
     result = await make_api_request("/documents", params)
-    # FIX: Return the result as a JSON object, not a string
     return {"content": [{"type": "json", "json": result}]}
 
 @app.post("/mcp/tools/get_topiclake_topics")
-async def get_topiclake_topics(params: Dict[str, Any]):
-    """Get TopicLake topics"""
+async def get_topiclake_topics_legacy(request: Request):
+    """Legacy endpoint - Get TopicLake topics"""
+    body = await request.json()
+    params = body.get("arguments", body)
     result = await make_api_request("/topiclake_topics", params)
-    # FIX: Return the result as a JSON object, not a string
     return {"content": [{"type": "json", "json": result}]}
 
 @app.post("/mcp/tools/get_qna")
-async def get_qna(params: Dict[str, Any]):
-    """Get Q&A pairs from TopicLake"""
+async def get_qna_legacy(request: Request):
+    """Legacy endpoint - Get Q&A pairs from TopicLake"""
+    body = await request.json()
+    params = body.get("arguments", body)
     result = await make_api_request("/qna", params)
-    # FIX: Return the result as a JSON object, not a string
     return {"content": [{"type": "json", "json": result}]}
 
 @app.post("/mcp/tools/get_sentiment")
-async def get_sentiment(params: Dict[str, Any]):
-    """Get sentiment analysis from TopicLake"""
+async def get_sentiment_legacy(request: Request):
+    """Legacy endpoint - Get sentiment analysis from TopicLake"""
+    body = await request.json()
+    params = body.get("arguments", body)
     result = await make_api_request("/sentiment", params)
-    # FIX: Return the result as a JSON object, not a string
     return {"content": [{"type": "json", "json": result}]}
 
 @app.post("/mcp/tools/get_summary")
-async def get_summary(params: Dict[str, Any]):
-    """Get document summaries from TopicLake"""
+async def get_summary_legacy(request: Request):
+    """Legacy endpoint - Get document summaries from TopicLake"""
+    body = await request.json()
+    params = body.get("arguments", body)
     result = await make_api_request("/summary", params)
-    # FIX: Return the result as a JSON object, not a string
     return {"content": [{"type": "json", "json": result}]}
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
+    print(f"--- STARTING SERVER ON PORT {port} ---")
     uvicorn.run(app, host="0.0.0.0", port=port)
