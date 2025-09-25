@@ -316,6 +316,10 @@ async def mcp_dispatcher(request_body: McpRequest):
     else:
         raise HTTPException(status_code=404, detail=f"Method not found: {request_body.method}")
 
+@app.get("/mcp")
+async def mcp_server_get_info():
+    return {"message": "MCP Server is running", "status": "healthy"}
+
 @app.post("/tools/list")
 async def list_tools():
     tools_list = []
