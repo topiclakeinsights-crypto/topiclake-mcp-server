@@ -4,7 +4,7 @@
 # Set your project ID (replace with your actual project ID)
 PROJECT_ID="topiclake-insights-engine"
 SERVICE_NAME="topiclake-mcp-server"
-REGION="us-central1"
+REGION="us-east1"
 
 # Build and deploy
 gcloud run deploy $SERVICE_NAME \
@@ -12,7 +12,7 @@ gcloud run deploy $SERVICE_NAME \
     --platform managed \
     --region $REGION \
     --allow-unauthenticated \
-    --set-env-vars TOPICLAKE_BEARER_TOKEN="your-secret-name:latest" \
+    --set-secrets TOPICLAKE_BEARER_TOKEN="topiclake-bearer-token:latest" \
     --project $PROJECT_ID
 
 echo "Deployment complete!"
