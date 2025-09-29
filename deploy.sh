@@ -4,7 +4,7 @@
 # Set your project ID (replace with your actual project ID)
 PROJECT_ID="topiclake-insights-engine"
 SERVICE_NAME="topiclake-mcp-server"
-REGION="us-east1"
+REGION="us-central1"
 
 # Build and deploy
 gcloud run deploy $SERVICE_NAME \
