@@ -9,8 +9,8 @@ It is generated with [Stainless](https://www.stainless.com/).
 Because it's not published yet, clone the repo and build it:
 
 ```sh
-git clone git@github.com:stainless-sdks/topiclake-mcp-server-typescript.git
-cd topiclake-mcp-server-typescript
+git clone git@github.com:topiclakeinsights-crypto/topiclake-mcp-server.git
+cd topiclake-mcp-server
 ./scripts/bootstrap
 ./scripts/build
 ```
@@ -40,11 +40,7 @@ For clients with a configuration JSON, it might look something like this:
   "mcpServers": {
     "topiclake_mcp_server_api": {
       "command": "node",
-      "args": [
-        "/path/to/local/topiclake-mcp-server-typescript/packages/mcp-server",
-        "--client=claude",
-        "--tools=all"
-      ],
+      "args": ["/path/to/local/topiclake-mcp-server/packages/mcp-server", "--client=claude", "--tools=all"],
       "env": {
         "TOPICLAKE_MCP_SERVER_API_KEY": "My API Key"
       }

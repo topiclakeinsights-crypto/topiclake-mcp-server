@@ -8,10 +8,10 @@
   "type": "commonjs",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/stainless-sdks/topiclake-mcp-server-typescript.git",
+    "url": "git+https://github.com/topiclakeinsights-crypto/topiclake-mcp-server.git",
     "directory": "packages/mcp-server"
   },
-  "homepage": "https://github.com/stainless-sdks/topiclake-mcp-server-typescript/tree/main/packages/mcp-server#readme",
+  "homepage": "https://github.com/topiclakeinsights-crypto/topiclake-mcp-server/tree/main/packages/mcp-server#readme",
   "license": "Apache-2.0",
   "packageManager": "yarn@1.22.22",
   "private": false,
