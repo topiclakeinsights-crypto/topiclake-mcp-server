@@ -1,6 +1,6 @@
 {
   "name": "topiclake-mcp-server",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "The official TypeScript library for the Topiclake Mcp Server API",
   "author": "Topiclake Mcp Server <>",
   "types": "dist/index.d.ts",
